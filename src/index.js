@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import pool from "./config/db.js";
+// import pool from "./config/db.js";
 
 import userRoutes from "./routes/userRoutes.js";
 import errorHandling from "./middlewares/errorHandler.js";
@@ -23,7 +23,7 @@ app.use("/api", userRoutes);
 app.use(errorHandling);
 
 //Create table before starting server
-createUserTable();
+//createUserTable();
 
 // Testing POSTGRES Connection
 app.get("/", async (req, res) => {
