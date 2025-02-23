@@ -2,24 +2,47 @@ import {
   createUserService,
   deleteUserService,
   getAllUsersService,
+  getUserByEmailService,
   getUserByIdService,
   updateUserService,
 } from "../models/userModel.js";
-
-// Standardized response function
-const handleResponse = (res, status, message, data = null) => {
-  res.status(status).json({
-    status,
-    message,
-    data,
-  });
-};
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { handleResponse } from "../config/utils.js";
 
 export const createUser = async (req, res, next) => {
-  const { name, email } = req.body;
+  const { name, email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    const newUser = await createUserService(name, email);
+    const newUser = await createUserService(name, email, hashedPassword);
     handleResponse(res, 201, "User created successfully", newUser);
+  } catch (err) {
+    next(err);
+  }
+};
+export const logginUser = async (req, res, next) => {
+  const { email, password } = req.body;
+  const user = await getUserByEmailService(email);
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    res
+      .status(401)
+      .json({ success: false, message: "Invalid email or password" });
+    return;
+  }
+  try {
+    const expiresIn = process.env.JWT_EXPIRATION;
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        role: "user"
+      },
+      process.env.jwt_secret,
+      { expiresIn }
+    );
+    handleResponse(res, 200, "User loggedIn successfully", { token, user });
   } catch (err) {
     next(err);
   }

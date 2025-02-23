@@ -1,20 +1,20 @@
 import pool from "../config/db.js";
 
 const createUserTable = async () => {
-  const queryText = `
+  const createTableQuery = `
     CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
-)
-    `;
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(100) UNIQUE NOT NULL,
+      password TEXT NOT NULL, 
+      created_at TIMESTAMP DEFAULT NOW()
+    );`;
 
   try {
-    pool.query(queryText);
-    console.log("User table created if not exists");
+    await pool.query(createTableQuery);
+    console.log("✅User table and password column created/updated.");
   } catch (error) {
-    console.log("Error creating users table : ", error);
+    console.error("Error setting up users table:", error);
   }
 };
 
